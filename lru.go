@@ -3,7 +3,6 @@ package gorillimiter
 import (
 	"container/list"
 	"errors"
-	"log"
 	"sync"
 	"time"
 )
@@ -48,9 +47,9 @@ func NewLRU(maxEntries int, ratePeriod time.Duration) (*Cache, error) {
 	}, nil
 }
 
-// Incr allows you to increment a key, if it's over the rate limit maxValue and it's been shorter
+// Inc allows you to increment a key, if it's over the rate limit maxValue and it's been shorter
 // than the grace period then it will return false for the underRateLimit boolean
-func (c *Cache) Incr(key string, maxValue int) (uint64, bool) {
+func (c *Cache) Inc(key string, maxValue int) (uint64, bool) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -134,5 +133,4 @@ func (c *Cache) removeElement(e *list.Element) {
 	c.evictList.Remove(e)
 	kv := e.Value.(*entry)
 	delete(c.cache, kv.key)
-	log.Println("[WARNING] Hit Limiter Eviction Limit - purging", kv.key, interface{}(e))
 }

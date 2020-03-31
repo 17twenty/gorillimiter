@@ -15,7 +15,7 @@ mux := http.NewServeMux()
 mux.HandleFunc("/", yourHandler)
 ...
 log.Println("Listening on :5000...")
-// Attach your listener here
+// Attach listener here with prefs for window
 http.ListenAndServe(":5000", gorillimiter.Limiter(mux, 10, time.Second))
 ```
 
@@ -23,7 +23,7 @@ http.ListenAndServe(":5000", gorillimiter.Limiter(mux, 10, time.Second))
 
 ```bash
 $ cd src/demo
-$ go build && ./demo 
+$ go build && ./demo
 2020/03/31 16:57:53 Listening on :5000...
 ... # At this point, smash it with curl -i localhost:5000
 2020/03/31 16:54:01 User [::1] is over rate limit, denying for now, current count [13]

@@ -14,7 +14,7 @@ func main() {
 		w.Write([]byte("OK"))
 	})
 
-	// Wrap the servemux with the limit middleware.
 	log.Println("Listening on :5000...")
+	// Attach the Limiter here
 	http.ListenAndServe(":5000", gorillimiter.Limiter(mux, 10, time.Second))
 }

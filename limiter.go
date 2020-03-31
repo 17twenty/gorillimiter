@@ -13,10 +13,11 @@ func Limiter(next http.Handler, requestsPerInterval int, interval time.Duration)
 
 	// This is only called once per limiter
 	// We'll only cache upto 1000 IP addresses
-	// And set the window to flush every 30 seconds (Interval)
+	// And set the window to flush every $interval seconds
+	// with a max of $requestsPerInterval per $interval
 	cache, err := NewLRU(1000, interval)
 	if err != nil {
-		log.Println("Couldn't create a cache - falling back on passthrough", err)
+		log.Println("Couldn't create a cache - falling back to passthrough", err)
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			next.ServeHTTP(w, r)
 			return
@@ -27,14 +28,16 @@ func Limiter(next http.Handler, requestsPerInterval int, interval time.Duration)
 		ip := getRemoteIP(r)
 
 		// Set a maximum of requestsPerInterval requests per interval
-		cnt, underRateLimit := cache.Incr(ip, requestsPerInterval)
+		cnt, underRateLimit := cache.Inc(ip, requestsPerInterval)
 		if underRateLimit {
 			// we good son
 			next.ServeHTTP(w, r)
-		} else {
-			log.Printf("User [%s] is over rate limit, denying for now, current count [%d]\n", ip, cnt)
-			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
 			return
 		}
+
+		log.Printf("User [%s] is over rate limit, denying for now, current hits [%d]\n", ip, cnt)
+		http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
+		return
+
 	})
 }
