@@ -35,7 +35,7 @@ func Limiter(next http.Handler, requestsPerInterval int, interval time.Duration)
 			return
 		}
 
-		log.Printf("User [%s] is over rate limit, denying for now, current hits [%d]\n", ip, cnt)
+		log.Printf("Address [%s] is over ratelimit, denying for now, current hits [%d]\n", ip, cnt)
 		http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
 		return
 
